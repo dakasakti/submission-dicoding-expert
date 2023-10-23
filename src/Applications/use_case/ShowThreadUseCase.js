@@ -1,8 +1,15 @@
+/* eslint-disable no-restricted-syntax */
 class ShowThreadUseCase {
-  constructor({ threadRepository, commentRepository, replyRepository }) {
+  constructor({
+    threadRepository,
+    commentRepository,
+    replyRepository,
+    likeRepository,
+  }) {
     this._threadRepository = threadRepository;
     this._commentRepository = commentRepository;
     this._replyRepository = replyRepository;
+    this._likeRepository = likeRepository;
   }
 
   async execute(useCasePayload) {
@@ -19,14 +26,17 @@ class ShowThreadUseCase {
       validatedComments,
       validatedReplies,
     );
+    const commentsWithRepliesAndLikeCount = await this._addLikeCountToComment(
+      commentsWithReplies,
+    );
+
     return {
       ...thread,
-      comments: commentsWithReplies,
+      comments: commentsWithRepliesAndLikeCount,
     };
   }
 
   _validateDeletedComment(comments) {
-    // eslint-disable-next-line no-restricted-syntax
     for (const comment of comments) {
       if (comment.is_delete) {
         comment.content = '**komentar telah dihapus**';
@@ -37,7 +47,6 @@ class ShowThreadUseCase {
   }
 
   _validateDeletedReply(replies) {
-    // eslint-disable-next-line no-restricted-syntax
     for (const reply of replies) {
       if (reply.is_delete) {
         reply.content = '**balasan telah dihapus**';
@@ -48,16 +57,23 @@ class ShowThreadUseCase {
   }
 
   _addReplyToComment(comments, replies) {
-    // eslint-disable-next-line no-restricted-syntax
     for (const comment of comments) {
       comment.replies = [];
-      // eslint-disable-next-line no-restricted-syntax
+
       for (const reply of replies) {
         if (reply.comment_id === comment.id) {
           comment.replies.push(reply);
         }
         delete reply.comment_id;
       }
+    }
+    return comments;
+  }
+
+  async _addLikeCountToComment(comments) {
+    for (const comment of comments) {
+      // eslint-disable-next-line no-await-in-loop
+      comment.likeCount = await this._likeRepository.getLikeCount(comment.id);
     }
     return comments;
   }
