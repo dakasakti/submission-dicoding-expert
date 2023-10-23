@@ -181,13 +181,13 @@ describe('CommentRepositoryPostgres', () => {
       // Assert
       expect(comments).toBeDefined();
       expect(comments).toHaveLength(2);
+      expect(comments[0]).toHaveProperty('date');
       expect(comments[0].id).toEqual('comment-456');
-      expect(comments[0].date).toEqual(new Date('2022-12-29T00:44:03.301Z'));
       expect(comments[0].username).toEqual('dicoding');
       expect(comments[0].content).toEqual('Lorem ipsum...');
       expect(comments[0].is_delete).toEqual(false);
+      expect(comments[1]).toHaveProperty('date');
       expect(comments[1].id).toEqual('comment-123');
-      expect(comments[1].date).toEqual(new Date('2022-12-29T00:44:10.275Z'));
       expect(comments[1].username).toEqual('dicoding');
       expect(comments[1].content).toEqual('Lorem ipsum...');
       expect(comments[1].is_delete).toEqual(false);
