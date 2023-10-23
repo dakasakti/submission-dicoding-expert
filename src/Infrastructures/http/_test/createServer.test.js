@@ -37,4 +37,19 @@ describe('HTTP server', () => {
     expect(responseJson.status).toEqual('error');
     expect(responseJson.message).toEqual('terjadi kegagalan pada server kami');
   });
+
+  describe('when GET /', () => {
+    it('should return 200 and restAPI by Mahmuda Karima', async () => {
+      const server = await createServer();
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/',
+      });
+
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.value).toEqual('restAPI by Mahmuda Karima');
+    });
+  });
 });

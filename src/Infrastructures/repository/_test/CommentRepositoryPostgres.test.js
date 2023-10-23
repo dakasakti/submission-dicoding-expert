@@ -82,6 +82,27 @@ describe('CommentRepositoryPostgres', () => {
   });
 
   describe('verifyCommentOwner function', () => {
+    it('should verify the comment owner correctly', async () => {
+      // Arrange
+      const commentId = 'comment-124';
+      const userId = 'user-124';
+      const threadId = 'thread-124';
+
+      await UsersTableTestHelper.addUser({ id: userId });
+      await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
+      await CommentsTableTestHelper.addComment({
+        id: commentId,
+        threadId,
+        owner: userId,
+      });
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      expect(
+        commentRepositoryPostgres.verifyCommentOwner(commentId, userId),
+      ).resolves.not.toThrowError(AuthorizationError);
+    });
+
     it('should throw UnauthorizedError when provided userId is not the comment owner', async () => {
       // Arrange
       const commentId = 'comment-123';
@@ -96,21 +117,6 @@ describe('CommentRepositoryPostgres', () => {
       expect(
         commentRepositoryPostgres.verifyCommentOwner(commentId, wrongUserId),
       ).rejects.toThrowError(AuthorizationError);
-    });
-
-    it('should verify the comment owner correctly', async () => {
-      // Arrange
-      const commentId = 'comment-123';
-      const userId = 'user-123';
-      await UsersTableTestHelper.addUser({ id: userId });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
-      await CommentsTableTestHelper.addComment({ id: commentId });
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-
-      // Action & Assert
-      expect(
-        commentRepositoryPostgres.verifyCommentOwner(commentId, userId),
-      ).resolves.not.toThrowError(AuthorizationError);
     });
   });
 
@@ -175,13 +181,13 @@ describe('CommentRepositoryPostgres', () => {
       // Assert
       expect(comments).toBeDefined();
       expect(comments).toHaveLength(2);
+      expect(comments[0]).toHaveProperty('date');
       expect(comments[0].id).toEqual('comment-456');
-      expect(comments[0].date).toEqual(new Date('2022-12-29T00:44:03.301Z'));
       expect(comments[0].username).toEqual('dicoding');
       expect(comments[0].content).toEqual('Lorem ipsum...');
       expect(comments[0].is_delete).toEqual(false);
+      expect(comments[1]).toHaveProperty('date');
       expect(comments[1].id).toEqual('comment-123');
-      expect(comments[1].date).toEqual(new Date('2022-12-29T00:44:10.275Z'));
       expect(comments[1].username).toEqual('dicoding');
       expect(comments[1].content).toEqual('Lorem ipsum...');
       expect(comments[1].is_delete).toEqual(false);

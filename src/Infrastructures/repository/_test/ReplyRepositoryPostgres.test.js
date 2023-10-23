@@ -132,6 +132,29 @@ describe('ReplyRepositoryPostgres', () => {
   });
 
   describe('verifyReplyOwner function', () => {
+    it('should verify the reply owner correctly', async () => {
+      // Arrange
+      const commentId = 'comment-123';
+      const replyId = 'reply-123';
+      const userId = 'user-123';
+      await UsersTableTestHelper.addUser({ id: userId });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
+      await CommentsTableTestHelper.addComment({
+        id: commentId,
+      });
+      await RepliesTableTestHelper.addReply({
+        id: replyId,
+        owner: userId,
+        commentId,
+      });
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      expect(
+        replyRepositoryPostgres.verifyReplyOwner(replyId, userId),
+      ).resolves.not.toThrowError(AuthorizationError);
+    });
+
     it('should throw UnauthorizedError when provided userId is not the reply owner', async () => {
       // Arrange
       const commentId = 'comment-123';
@@ -154,29 +177,6 @@ describe('ReplyRepositoryPostgres', () => {
       expect(
         replyRepositoryPostgres.verifyReplyOwner(replyId, wrongUserId),
       ).rejects.toThrowError(AuthorizationError);
-    });
-
-    it('should verify the reply owner correctly', async () => {
-      // Arrange
-      const commentId = 'comment-123';
-      const replyId = 'reply-123';
-      const userId = 'user-123';
-      await UsersTableTestHelper.addUser({ id: userId });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
-      await CommentsTableTestHelper.addComment({
-        id: commentId,
-      });
-      await RepliesTableTestHelper.addReply({
-        id: replyId,
-        owner: userId,
-        commentId,
-      });
-      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
-
-      // Action & Assert
-      expect(
-        replyRepositoryPostgres.verifyReplyOwner(replyId, userId),
-      ).resolves.not.toThrowError(AuthorizationError);
     });
   });
 

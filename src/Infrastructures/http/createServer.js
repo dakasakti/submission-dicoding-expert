@@ -14,9 +14,7 @@ const createServer = async (container) => {
     port: process.env.PORT,
   });
 
-  await server.register([
-    { plugin: Jwt },
-  ]);
+  await server.register([{ plugin: Jwt }]);
 
   // define JWT auth strategy
   server.auth.strategy('forum_jwt', 'jwt', {
@@ -55,6 +53,16 @@ const createServer = async (container) => {
     {
       plugin: replies,
       options: { container },
+    },
+  ]);
+
+  server.route([
+    {
+      method: 'GET',
+      path: '/',
+      handler: () => ({
+        value: 'restAPI by Mahmuda Karima',
+      }),
     },
   ]);
 
